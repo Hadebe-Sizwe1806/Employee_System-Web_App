@@ -1,0 +1,8 @@
+﻿# Keep service account out of source control
+/serviceAccount.json
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.cache

@@ -1,0 +1,121 @@
+﻿@model dynamic
+@{
+    // Model (optional): { Url = "private file url", Alt = "optional", Id = "optional-id", Width = "optional", Height = "optional" }
+    var url = Model?.Url ?? "";
+    var alt = Model?.Alt ?? "";
+    var id = Model?.Id ?? "";
+    var width = Model?.Width ?? "";
+    var height = Model?.Height ?? "";
+}
+<div @(String.IsNullOrEmpty(id) ? "" : $"id=\"{id}\"") class="private-media" data-private-url="@url" aria-hidden="false" style="min-height:48px;">
+    <div class="private-media-placeholder text-muted">Loading secure preview…</div>
+</div>
+
+<script>
+window.loadPrivateMedia = window.loadPrivateMedia || (async function loadPrivateMedia(rootSelector) {
+    const root = rootSelector ? document.querySelector(rootSelector) : document;
+    if (!root) return;
+    const elems = root.querySelectorAll('[data-private-url].private-media');
+    if (!elems.length) return;
+
+    // Prefer global helper if present (exposed by admin-verifications.js), otherwise use local implementation.
+    const hasGlobalFetch = typeof window.fetchPrivateUrl === 'function';
+
+    async function fetchWithToken(url) {
+        if (hasGlobalFetch) {
+            // window.fetchPrivateUrl returns a Response already checked for ok
+            return await window.fetchPrivateUrl(url);
+        }
+
+        // Local fallback: use firebaseHelpers.auth currentUser to attach idToken
+        if (!window.firebaseHelpers || !window.firebaseHelpers.auth) {
+            throw new Error('firebaseHelpers.auth not available');
+        }
+        const user = window.firebaseHelpers.auth.currentUser;
+        if (!user) {
+            // wait briefly for auth initialization
+            await new Promise(resolve => setTimeout(resolve, 500));
+        }
+        const token = await window.firebaseHelpers.auth.currentUser.getIdToken();
+        const res = await fetch(url, {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!res.ok) throw new Error('Fetch failed: ' + res.status);
+        return res;
+    }
+
+    for (const el of elems) {
+        const privateUrl = el.dataset.privateUrl;
+        if (!privateUrl) continue;
+        // remove placeholder text
+        el.innerHTML = '';
+        try {
+            // Determine type from url extension (fallbacks to server Content-Type if needed)
+            const extMatch = privateUrl.split('?')[0].match(/\.([^.\/]+)$/);
+            const ext = extMatch ? extMatch[1].toLowerCase() : '';
+
+            const res = await fetchWithToken(privateUrl);
+            const contentType = res.headers.get('Content-Type') || '';
+
+            // prefer Content-Type over extension when available
+            if (contentType.includes('application/pdf') || ext === 'pdf') {
+                // create blob and object URL
+                const blob = await res.blob();
+                const objectUrl = URL.createObjectURL(blob);
+
+                // Create inline viewer and open link (object URL is safe)
+                const link = document.createElement('a');
+                link.href = objectUrl;
+                link.textContent = 'Open PDF in new tab';
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+                link.className = 'btn btn-sm btn-outline-primary mb-2';
+
+                const iframe = document.createElement('iframe');
+                iframe.src = objectUrl;
+                iframe.width = '100%';
+                iframe.height = '500';
+                iframe.style.border = '1px solid #ddd';
+                iframe.style.borderRadius = '4px';
+
+                el.appendChild(link);
+                el.appendChild(iframe);
+            } else if (contentType.startsWith('image/') || ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'].includes(ext)) {
+                const blob = await res.blob();
+                const objectUrl = URL.createObjectURL(blob);
+                const img = document.createElement('img');
+                img.src = objectUrl;
+                img.alt = el.dataset.privateAlt || '';
+                img.style.maxWidth = '100%';
+                img.style.borderRadius = '6px';
+                img.className = 'img-fluid';
+                el.appendChild(img);
+            } else {
+                // Unknown binary: offer download link (object URL)
+                const blob = await res.blob();
+                const objectUrl = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = objectUrl;
+                link.textContent = 'Download file';
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+                link.className = 'btn btn-sm btn-outline-secondary';
+                el.appendChild(link);
+            }
+        } catch (ex) {
+            console.error('Error loading private media', ex);
+            el.innerHTML = `<div class="text-danger small">Unable to load private file. Please try again.</div>`;
+        }
+    }
+});
+
+// Auto-run on initial load
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.loadPrivateMedia) window.loadPrivateMedia();
+});
+
+// Optional: listen for custom event to reload specific areas
+document.addEventListener('private-media-updated', () => {
+    if (window.loadPrivateMedia) window.loadPrivateMedia();
+});
+</script>

@@ -1,0 +1,98 @@
+@{
+    ViewData["Title"] = "Employee Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<nav class="navbar navbar-dark bg-primary shadow-sm">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+        <span class="navbar-brand fw-semibold">Employee Dashboard</span>
+        <div class="d-flex gap-2">
+            <a href="/Employee/Profile" class="btn btn-light btn-sm">View Profile</a>
+            <button id="logoutBtn" data-redirect="/" class="btn btn-outline-light btn-sm">Logout</button>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <div class="card p-4 shadow-sm border-0">
+        <h5 class="mb-3 text-primary fw-bold">Submit Verification</h5>
+
+        <form id="verifForm" class="mb-3">
+            <div class="mb-3">
+                <label class="form-label fw-semibold">ID Document</label>
+                <input type="file" id="idFile" class="form-control" accept=".jpg,.jpeg,.png,.pdf" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Proof of Employment</label>
+                <input type="file" id="proofFile" class="form-control" accept=".jpg,.jpeg,.png,.pdf" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Selfie (face visible)</label>
+                <input type="file" id="selfieFile" class="form-control" accept=".jpg,.jpeg,.png" />
+            </div>
+
+            <div class="d-flex gap-2">
+                <button id="submitVerifBtn" class="btn btn-primary">Submit Verification</button>
+                <button type="reset" id="cancelVerifBtn" class="btn btn-outline-secondary">Reset</button>
+            </div>
+
+            <div id="verifMsg" class="mt-3 text-center small text-muted"></div>
+        </form>
+
+        <hr />
+
+        <h6 class="fw-semibold mb-2">My Verification</h6>
+        <p class="text-muted small">
+            Your uploaded documents are private and viewable only by you and administrators.
+        </p>
+
+        <div id="verificationHeader" class="mb-3 d-flex justify-content-between align-items-center">
+            <div>
+                <span id="verificationStatusBadge" class="badge bg-secondary">No verification</span>
+                <small id="verificationDate" class="text-muted ms-2"></small>
+            </div>
+        </div>
+
+        <div id="verificationComment" class="mb-2 text-muted small" style="display:none;"></div>
+
+        <div id="myVerificationDocs" class="row">
+            <div class="col-md-4 mb-3">
+                <div id="idDocPlaceholder" class="border rounded p-3 text-center text-muted">
+                    No ID document available.
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div id="proofDocPlaceholder" class="border rounded p-3 text-center text-muted">
+                    No proof document available.
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div id="selfieDocPlaceholder" class="border rounded p-3 text-center text-muted">
+                    No selfie available.
+                </div>
+            </div>
+        </div>
+
+        <div id="appealSection" style="display:none;" class="mt-3">
+            <h6 class="fw-semibold">Appeal Rejection</h6>
+            <div class="mb-2 small text-muted">
+                You may submit an appeal; this will set your verification back to
+                <strong>pending</strong> for re-review by administrators.
+            </div>
+            <div class="mb-2">
+                <textarea id="appealMessage" rows="3" class="form-control"
+                          placeholder="Write your appeal message (explain why the decision should be reconsidered)"></textarea>
+            </div>
+            <div class="d-flex gap-2">
+                <button id="submitAppealBtn" class="btn btn-warning btn-sm">Submit Appeal</button>
+                <button id="cancelAppealBtn" class="btn btn-outline-secondary btn-sm">Cancel</button>
+            </div>
+            <div id="appealMsg" class="mt-2 small text-center"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="/js/employee-profile.js"></script>
+    <script src="/js/logout.js"></script>
+}

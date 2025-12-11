@@ -1,0 +1,75 @@
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<nav class="navbar navbar-dark bg-dark shadow-sm">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+        <span class="navbar-brand fw-semibold">Admin Dashboard</span>
+        <button id="logoutBtn" data-redirect="/Admin/Login" class="btn btn-outline-light">Logout</button>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <ul class="nav nav-tabs" id="adminTabs" role="tablist">
+        <li class="nav-item"><button class="nav-link active" id="employees-tab" data-bs-toggle="tab" data-bs-target="#employees">Employees</button></li>
+        <li class="nav-item"><button class="nav-link" id="verifs-tab" data-bs-toggle="tab" data-bs-target="#verifs">Verifications</button></li>
+    </ul>
+
+    <div class="tab-content mt-3">
+        <!-- Employees Tab -->
+        <div class="tab-pane fade show active" id="employees">
+            <div class="card p-3 mb-3">
+                <h5>Add Employee</h5>
+                <form id="addEmployeeForm" class="mt-2">
+                    <div class="row g-2">
+                        <div class="col-md-4"><input id="empName" class="form-control" placeholder="Name" /></div>
+                        <div class="col-md-4"><input id="empSurname" class="form-control" placeholder="Surname" /></div>
+                        <div class="col-md-4"><input id="empRole" class="form-control" placeholder="Work Role" /></div>
+                    </div>
+                    <div class="row g-2 mt-2">
+                        <div class="col-md-4"><input id="empPhone" class="form-control" placeholder="Phone" /></div>
+                        <div class="col-md-4"><input id="empEmail" class="form-control" placeholder="Email" /></div>
+                        <div class="col-md-4 d-grid"><button id="addEmpBtn" type="button" class="btn btn-primary">Add Employee</button></div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card p-3">
+                <h5>Employees List</h5>
+                <table class="table table-hover align-middle mt-3" id="employeesTable">
+                    <thead class="table-light">
+                        <tr><th>Name</th><th>Role</th><th>Email</th><th>Phone</th><th>Photo</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Verifications Tab -->
+        <div class="tab-pane fade" id="verifs">
+            <h5 class="mb-3">Verification Requests</h5>
+            <div class="d-flex gap-3 flex-wrap mb-3">
+                <div class="card flex-fill text-center p-2"><div class="text-warning fw-bold">Pending</div><div id="pendingCount" class="h5">0</div></div>
+                <div class="card flex-fill text-center p-2"><div class="text-success fw-bold">Approved</div><div id="approvedCount" class="h5">0</div></div>
+                <div class="card flex-fill text-center p-2"><div class="text-danger fw-bold">Rejected</div><div id="rejectedCount" class="h5">0</div></div>
+                <div class="ms-auto d-flex align-items-center"><button id="refreshVerifsBtn" class="btn btn-outline-primary btn-sm">Refresh</button></div>
+            </div>
+
+            <div id="verifsLoader" class="text-center my-3" style="display:none;">
+                <div class="spinner-border text-primary" role="status"></div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-3"><div class="card"><div class="card-header bg-warning text-dark">Pending</div><div class="card-body p-2" style="min-height:180px;"><div id="pendingList" class="d-grid gap-2"></div></div></div></div>
+                <div class="col-md-4 mb-3"><div class="card"><div class="card-header bg-success text-white">Approved</div><div class="card-body p-2" style="min-height:180px;"><div id="approvedList" class="d-grid gap-2"></div></div></div></div>
+                <div class="col-md-4 mb-3"><div class="card"><div class="card-header bg-danger text-white">Rejected</div><div class="card-body p-2" style="min-height:180px;"><div id="rejectedList" class="d-grid gap-2"></div></div></div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="/js/admin-employees.js"></script>
+    <script src="/js/admin-verifications.js"></script>
+    <script src="/js/logout.js"></script>
+}
